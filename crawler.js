@@ -1,17 +1,18 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
+const { fileURLToPath } = require("url");
 
-const getHtml = async () => {
+const getHtml = async (type) => {
     try {
-        return await axios.get("https://poro.gg/champions?gameMode=aram");
+        return await axios.get(`https://poro.gg/champions?gameMode=${type}`);
     } catch (error) {
         console.error(error);
     }
 };
 
 module.exports = {
-    stuff: function (callback) {
-        getHtml()
+    stuff: function (type, callback) {
+        getHtml(type)
             .then(html => {
                 let champions = [];
                 const $ = cheerio.load(html.data);
