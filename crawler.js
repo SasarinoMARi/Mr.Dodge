@@ -15,7 +15,7 @@ module.exports = {
             .then(html => {
                 let champions = [];
                 const $ = cheerio.load(html.data);
-                const $bodyList = $("div.champion-sub-list__content").children("div.champion-sub-list__item");
+                const $bodyList = $("div.champion-sub-list__content").first().children("div.champion-sub-list__item");
 
                 $bodyList.each(function (i, elem) {
                     if (i > 0)

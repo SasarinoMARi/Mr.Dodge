@@ -3,6 +3,8 @@ const dic = require('./dictionary.json');
 const discord = require('discord.js');
 const crawler = require('./crawler');
 
+const fs = require('fs');
+
 const client = new discord.Client({
   intents: [
     'GUILDS',
@@ -13,6 +15,24 @@ const client = new discord.Client({
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 });
+
+function dataLog(data) {
+  var builder = "";
+  for(var i= 0; i< data.length; i++) {
+    builder +=  data[i].rank+'\t' + data[i].tier+'\t' + data[i].name+'\t' + data[i].winrate+'\t' + data[i].pickrate+'\n';
+  }
+  return builder;
+}
+
+function getTierString(tier) {
+  if(tier==="Tier 1") return ":crown:";
+  else if(tier==="Tier 2") return ":second_place:";
+  else if(tier==="Tier 3") return ":third_place:";
+  else if(tier==="Tier 4") return ":four:";
+  else if(tier==="Tier 5") return ":poop:";
+  else if(tier==="애쉬") return getTierString("Tier 1"); //왜이럼이거..
+  else return tier;
+}
 
 client.on('message', msg => {
   if (msg.content === 'ping') {
@@ -28,13 +48,31 @@ client.on('message', msg => {
     });
 
     crawler.stuff(function (data) {
-      console.log("크롤러 반환 완료, 데이터 수 : " + data.length);
+      fs.writeFileSync("crawled.txt", '\ufeff' + dataLog(data), {encoding: 'utf-8'});
+
+      // 파라미터로 입력받은 챔피언만 걸러냄
       let res = data.filter(x => params.includes(x.name));
 
-      var builder = "순위\t티어\t이름\t승률\t픽률\n";
+      // 결과 문자열 빌드
+      var builder = "";
+      var summary = 0;
       for(var i= 0; i< res.length; i++) {
-        builder += res[i].rank+'\t' + res[i].tier+'\t' + res[i].name+'\t' + res[i].winrate+'\t' + res[i].pickrate+'\n';
+        builder += `${getTierString(res[i].tier)} ${res[i].name}\t\t\t\t\t[승률 ${res[i].rank}위(${res[i].winrate}) / 픽률:${res[i].pickrate}]\n`;
+        summary += parseFloat(res[i].winrate.slice(0, -1));
       }
+
+      if(res.length == 5) {
+        const average = summary / 5;
+        builder += `\n\n승률 평균 : ${average.toFixed(2)}%`
+
+        if(average < 50) {
+          builder += `\n\n
+          ＿人人人人人＿
+          ＞ 닷지하자 ＜
+          ￣Y^Y^Y^Y^Y￣`;
+        }
+      }
+
       msg.reply(builder);
     });
   }
