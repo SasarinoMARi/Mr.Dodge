@@ -46,7 +46,7 @@ function stuff(type, msg) {
   // 어댑터 호출
   adapter.get(type, function (data) {
     // 파라미터로 입력받은 챔피언만 걸러낸다.
-    let res = data.filter(x => params.includes(x.name));
+    let res = data.filter(x => params.includes(x.name.replaceAll(' ', '')));
 
     // 결과 문자열 빌드
     var builder = `게임 모드 : **${type}**\n\n`;
